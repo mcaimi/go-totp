@@ -1,13 +1,14 @@
 package rfc6238
 
 import (
-  "fmt"
-  "strings"
-  "math"
-  "time"
-  "encoding/base32"
-  "encoding/binary"
-  "github.com/mcaimi/go-hotp/rfc4226"
+	"encoding/base32"
+	"encoding/binary"
+	"fmt"
+	"math"
+	"strings"
+	"time"
+
+	"github.com/mcaimi/go-hotp/rfc4226"
 )
 
 const (
@@ -16,6 +17,33 @@ const (
   // gmtime(0) or 1 Jan 1970. Unix Epoch
   EPOCH = 0
 )
+
+// totp token object
+type TOTP struct {
+ key []byte;
+ timecounter int;
+ timestep int;
+ token_len int;
+ is_base32 bool;
+ algorithm string;
+ computed_token uint32;
+}
+
+// generate a new totp object
+func NewTotp(key []byte, timecounter int, timestep int, token_len int, is_base32 bool, algorithm string) TOTP {
+  var t TOTP;
+
+  // assign values
+  t.key = key;
+  t.timecounter = timecounter;
+  t.timestep = timestep;
+  t.token_len = token_len;
+  t.is_base32 = is_base32;
+  t.algorithm = algorithm;
+  
+  // return object
+  return t;
+}
 
 // normalize input string
 // remove all whitespaces and convert the string into a byte array
@@ -42,47 +70,47 @@ func normalize(inputString string) []byte {
 // is_base32: specifies whether the key array is base32 encoded or not (google-auth compatibility)
 // digestFunc: HMAC function to use during computation
 // 
-func TotpToken(key []byte, timecounter int, timestep int, token_len int, is_base32 bool, digestFunc func([]byte, []byte) []byte) (uint32, error) {
+func (v *TOTP) TotpToken() error {
   // google-authenticator style totp token
   // decode key from base32 encoded byte array
-  if is_base32 {
+  if v.is_base32 {
     // compute padding information
-    padlen := len(key) % 8;
+    padlen := len(v.key) % 8;
     if padlen > 0 {
       padstring := fmt.Sprintf("%s", strings.Repeat("=", (8 - padlen)));
       // pad string as necessary
-      key = append(key, []byte(padstring)...);
+      v.key = append(v.key, []byte(padstring)...);
     }
 
     // decode the base32 input string
-    output := make([]byte, base32.StdEncoding.DecodedLen(len(key)));
-    _, err := base32.StdEncoding.Decode(output, []byte(key));
+    output := make([]byte, base32.StdEncoding.DecodedLen(len(v.key)));
+    _, err := base32.StdEncoding.Decode(output, []byte(v.key));
     if err != nil {
-      return 0, err;
+      return err;
     } else {
-      key = output;
+      v.key = output;
     }
   }
 
   // set up time counter
   var timevalue float64;
-  if timecounter == -1 {
+  if v.timecounter == -1 {
     timevalue = 12345678; // static value used for testing purposes
-  } else if timecounter == 0 {
+  } else if v.timecounter == 0 {
     now := time.Now();
-    timevalue = math.Floor(float64(now.Unix() - int64(EPOCH)) / float64(timestep));
+    timevalue = math.Floor(float64(now.Unix() - int64(EPOCH)) / float64(v.timestep));
   } else {
-    timevalue = math.Floor(float64(timecounter) / float64(timestep));
+    timevalue = math.Floor(float64(v.timecounter) / float64(v.timestep));
   }
  
   // generate TOTP value
-  var totpToken uint32;
   byteInterval := make([]byte, 8);
   binary.BigEndian.PutUint64(byteInterval, uint64(timevalue));
-  totpToken = rfc4226.HotpToken(key, byteInterval, token_len, digestFunc);
+  h := rfc4226.NewHotp(v.key, byteInterval, v.token_len, v.algorithm);
+  v.computed_token = h.HotpToken();
 
   // return computed totp value
-  return totpToken, nil;
+  return nil;
 }
 
 // return a string representation of the totp token integer value
@@ -90,15 +118,15 @@ func TotpToken(key []byte, timecounter int, timestep int, token_len int, is_base
 // totpToken: result of the TotpToken() function
 // token_len: length of the computed Token
 //
-func TokenToString(totpToken uint32, token_len int) string {
+func (v *TOTP) TokenToString() string {
   // convert integer to string
   var totpString string;
-  totpString = fmt.Sprintf("%d", totpToken);
+  totpString = fmt.Sprintf("%d", v.computed_token);
 
   // pad as necessary
   ls := len(totpString);
-  if ls < token_len {
-    totpString = fmt.Sprintf("%s%s", strings.Repeat("0", (token_len - ls)), totpString);
+  if ls < v.token_len {
+    totpString = fmt.Sprintf("%s%s", strings.Repeat("0", (v.token_len - ls)), totpString);
   }
   return totpString;
 }

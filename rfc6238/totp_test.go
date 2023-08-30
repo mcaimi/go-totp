@@ -2,7 +2,6 @@ package rfc6238
 
 import (
   "testing"
-  "github.com/mcaimi/go-hmac/rfc2104"
 )
 
 const (
@@ -19,11 +18,12 @@ func TestRFC(t *testing.T) {
   keyBytes = normalize(KEY);
   t.Logf("Key Bytes: %q\n", keyBytes);
 
-  intToken, err := TotpToken(keyBytes, -1, 60, TEST_TOKEN_LEN, false, rfc2104.SHA1Hmac);
+  v := NewTotp(keyBytes, -1, 60, TEST_TOKEN_LEN, false, "sha1");
+  err := v.TotpToken();
   if err != nil {
     t.Fail();
   }
-  testToken = TokenToString(intToken, TEST_TOKEN_LEN);
+  testToken = v.TokenToString();
 
   t.Logf("Computed TOTP Token (RFC): %s\n", testToken);
 
@@ -40,11 +40,12 @@ func TestGoogle(t *testing.T) {
   keyBytes = normalize(KEY);
   t.Logf("Key Bytes: %q\n", keyBytes);
 
-  intToken, err := TotpToken(keyBytes, -1, TIMESTEP, TEST_TOKEN_LEN, true, rfc2104.SHA1Hmac);
+  v := NewTotp(keyBytes, -1, TIMESTEP, TEST_TOKEN_LEN, true, "sha1");
+   err := v.TotpToken();
   if err != nil {
     t.Fail();
   }
-  testToken = TokenToString(intToken, TEST_TOKEN_LEN);
+  testToken = v.TokenToString();
   t.Logf("Computed TOTP Token (GOOGLE): %s\n", testToken);
 
   if !(testToken == RESULT_GOOGLE) {

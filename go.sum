@@ -1,4 +1,4 @@
-github.com/mcaimi/go-hmac v0.0.0-20230322104258-6578e084923c h1:d1wkU6jWuT4QxePJ5b6lbRSChltDh6ON3T/WrDCTKMA=
-github.com/mcaimi/go-hmac v0.0.0-20230322104258-6578e084923c/go.mod h1:BQoJ9pfELxClLK+d6YXZHfeyi6M7DROiU7SQl2r3HnQ=
-github.com/mcaimi/go-hotp v0.0.0-20230324080742-259cbb77f0e6 h1:afc7YHEm7Sc7S4VhWsjcBCgPwEwpVOqsLFzNJvYPxyE=
-github.com/mcaimi/go-hotp v0.0.0-20230324080742-259cbb77f0e6/go.mod h1:/u/jONG0bdAKjRyQk2h4SvQFG2PKg/yfCyMnd4TZRRA=
+github.com/mcaimi/go-hmac v0.0.0-20230830072048-a23288e8925d h1:MzE0y3CT1lJqwjgNGWpcWMkq28L28Pe4pSvSOrWLsig=
+github.com/mcaimi/go-hmac v0.0.0-20230830072048-a23288e8925d/go.mod h1:BQoJ9pfELxClLK+d6YXZHfeyi6M7DROiU7SQl2r3HnQ=
+github.com/mcaimi/go-hotp v0.0.0-20230830072358-94cd1f156767 h1:JBM0juKfCle5V49re81OI/VOkU7P2poMQ7ID2sn7p18=
+github.com/mcaimi/go-hotp v0.0.0-20230830072358-94cd1f156767/go.mod h1:W4+iasGKUszq2NfKrTRsgQhwGIkg2tS+zaPYkSEpFyo=
